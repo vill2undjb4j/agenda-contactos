@@ -1,6 +1,10 @@
 
 <?php
 session_start();
+if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !hash_equals($_SESSION['csrf'], (string)($_POST['csrf'] ?? ''))) {
+    http_response_code(403); exit('Solicitud no válida.');
+}
 
 if (!isset($_SESSION["usuario_id"])) {
     header("Location: login.php");
@@ -124,6 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <?php endif; ?>
 
 <form method="POST">
+<input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf']) ?>">
 
     <label>Nombre:</label>
     <input

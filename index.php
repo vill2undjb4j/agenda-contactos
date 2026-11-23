@@ -1,6 +1,10 @@
 
 <?php
 session_start();
+if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !hash_equals($_SESSION['csrf'], (string)($_POST['csrf'] ?? ''))) {
+    http_response_code(403); exit('Solicitud no válida.');
+}
 
 // Verificar que el usuario haya iniciado sesión
 if (!isset($_SESSION["usuario_id"])) {
@@ -83,7 +87,7 @@ if (isset($_SESSION["mensaje"])) {
 // BUSCAR CONTACTOS POR NOMBRE, TELÉFONO O CÉDULA
 $busqueda = trim($_GET["buscar"] ?? "");
 
-$sql_contactos = "SELECT id, nombre, cedula, telefono, correo, ciudad
+$sql_contactos = "SELECT id, nombre, cedula, telefono, correo, ciudad, favorito, fecha_creacion
                   FROM contactos
                   WHERE usuario_id = ?";
 
@@ -95,6 +99,8 @@ if ($busqueda !== "") {
         nombre LIKE ?
         OR telefono LIKE ?
         OR cedula LIKE ?
+        OR correo LIKE ?
+        OR ciudad LIKE ?
     )";
 
     $termino = "%" . $busqueda . "%";
@@ -102,9 +108,16 @@ if ($busqueda !== "") {
     $parametros[] = $termino;
     $parametros[] = $termino;
     $parametros[] = $termino;
+    $parametros[] = $termino;
+    $parametros[] = $termino;
 }
 
-$sql_contactos .= " ORDER BY id DESC";
+$orden = $_GET['orden'] ?? 'fecha';
+$ordenes = ['nombre'=>'nombre ASC, id ASC', 'ciudad'=>'ciudad ASC, nombre ASC, id ASC', 'fecha'=>'fecha_creacion DESC, id DESC'];
+if (!is_string($orden) || !isset($ordenes[$orden])) $orden = 'fecha';
+$soloFavoritos = ($_GET['favoritos'] ?? '') === '1';
+if ($soloFavoritos) $sql_contactos .= ' AND favorito = 1';
+$sql_contactos .= ' ORDER BY ' . $ordenes[$orden];
 
 $stmt_contactos = $conexion->prepare($sql_contactos);
 $stmt_contactos->execute($parametros);
@@ -131,6 +144,7 @@ $contactos = $stmt_contactos->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- CERRAR SESIÓN -->
     <form action="logout.php" method="POST">
+<input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf']) ?>">
         <button type="submit">Cerrar sesión</button>
     </form>
 
@@ -153,6 +167,7 @@ $contactos = $stmt_contactos->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- FORMULARIO DE REGISTRO -->
     <form action="index.php" method="POST">
+<input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf']) ?>">
 
         <label for="nombre">Nombre:</label>
         <input
@@ -223,13 +238,20 @@ $contactos = $stmt_contactos->fetchAll(PDO::FETCH_ASSOC);
             type="text"
             id="buscar"
             name="buscar"
-            placeholder="Nombre, teléfono o cédula"
+            placeholder="Nombre, correo, ciudad, teléfono o cédula"
             value="<?= htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8') ?>"
         >
 
         <br><br>
 
-        <button type="submit">Buscar</button>
+        <label for="orden">Ordenar por:</label>
+        <select name="orden" id="orden">
+        <?php foreach (['nombre'=>'Nombre (A-Z)', 'ciudad'=>'Ciudad (A-Z)', 'fecha'=>'Más recientes'] as $clave=>$etiqueta): ?>
+          <option value="<?= $clave ?>" <?= $orden === $clave ? 'selected' : '' ?>><?= $etiqueta ?></option>
+        <?php endforeach; ?>
+        </select>
+        <label><input type="checkbox" name="favoritos" value="1" <?= $soloFavoritos ? 'checked' : '' ?>> Solo favoritos</label>
+        <button type="submit">Aplicar filtros</button>
 
         <a href="index.php">Mostrar todos</a>
 
@@ -249,7 +271,7 @@ $contactos = $stmt_contactos->fetchAll(PDO::FETCH_ASSOC);
                     <th>Teléfono</th>
                     <th>Correo</th>
                     <th>Ciudad</th>
-                    <th>Acciones</th>
+                    <th>Fecha de creación</th><th>Favorito</th><th>Acciones</th>
                 </tr>
             </thead>
 
@@ -278,8 +300,13 @@ $contactos = $stmt_contactos->fetchAll(PDO::FETCH_ASSOC);
                             <?= htmlspecialchars($contacto["ciudad"] ?? "", ENT_QUOTES, 'UTF-8') ?>
                         </td>
 
+                        <td><?= htmlspecialchars($contacto['fecha_creacion']) ?></td>
+                        <td><form action="favorito.php" method="POST">
+<input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf']) ?>">
+                          <input type="hidden" name="id" value="<?= (int)$contacto['id'] ?>">
+                          <button class="estrella" type="submit"><?= $contacto['favorito'] ? '★ Sí · Quitar' : '☆ No · Marcar' ?></button>
+                        </form></td>
                         <td>
-
                             <!-- EDITAR CONTACTO -->
                             <a href="editar.php?id=<?= (int)$contacto["id"] ?>">
                                 Editar
@@ -294,6 +321,7 @@ $contactos = $stmt_contactos->fetchAll(PDO::FETCH_ASSOC);
                                 style="display:inline;"
                                 onsubmit="return confirm('¿Seguro que deseas eliminar este contacto?');"
                             >
+<input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf']) ?>">
 
                                 <input
                                     type="hidden"
@@ -318,10 +346,10 @@ $contactos = $stmt_contactos->fetchAll(PDO::FETCH_ASSOC);
 
     <?php else: ?>
 
-        <?php if ($busqueda !== ""): ?>
+        <?php if ($busqueda !== "" || $soloFavoritos): ?>
 
             <p>
-                No se encontraron contactos con esa búsqueda.
+                No se encontraron contactos con los filtros seleccionados.
             </p>
 
         <?php else: ?>

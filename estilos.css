@@ -156,3 +156,7 @@ hr {
         white-space: nowrap;
     }
 }
+
+select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+input[type=checkbox] { width: auto; }
+td button.estrella { background: #805b12; color: white; }
