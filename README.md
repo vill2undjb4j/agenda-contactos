@@ -1,88 +1,68 @@
-
-# MI AGENDA DE CONTACTOS
+# MI AGENDA DE CONTACTOS - VERSIÓN 2.0
 
 ## 1. Descripción del proyecto
 
-Mi Agenda de Contactos es una aplicación web desarrollada
-para registrar, consultar, buscar, editar y eliminar contactos.
+Aplicación web desarrollada en PHP y MySQL que permite administrar contactos personales de manera organizada mediante una cuenta de usuario.
 
-El sistema permite crear cuentas de usuario e iniciar sesión
-para administrar los contactos personales de forma organizada.
-
-Cada contacto puede contener:
-- Nombre completo
-- Cédula
-- Teléfono
-- Correo electrónico
-- Ciudad
-
-## 2. Tecnologías utilizadas
-
-- HTML5: estructura de la aplicación.
-- CSS3: diseño y presentación visual.
-- PHP: programación del sistema.
-- MySQL/MariaDB: base de datos.
-- PDO: conexión a la base de datos.
-- XAMPP: servidor local Apache y MySQL.
-- Visual Studio Code: editor de código.
-
-## 3. Requisitos para su ejecución
-
-- Tener instalado XAMPP.
-- Contar con PHP y MySQL/MariaDB.
-- Tener habilitadas las extensiones PDO MySQL y mbstring.
-- Utilizar un navegador web.
-- Tener disponibles Apache y MySQL.
-
-## 4. Pasos para instalar la aplicación
-
-1. Instalar XAMPP.
-2. Copiar la carpeta agenda_contactos dentro de htdocs.
-3. Iniciar Apache y MySQL desde XAMPP.
-4. Abrir phpMyAdmin desde el navegador.
-5. Crear una base de datos llamada agenda_contactos.
-6. Importar el archivo agenda_contactos.sql.
-7. Revisar la configuración de conexion.php.
-8. Configurar el puerto MySQL correspondiente.
-   En el entorno de desarrollo se utilizó el puerto 3307.
-9. Abrir la siguiente dirección:
-   http://localhost/agenda_contactos/registro.php
-10. Registrar un usuario nuevo.
-11. Iniciar sesión desde login.php.
-12. Comenzar a administrar los contactos.
-
-## 5. Funcionalidades del sistema
+## 2. Funcionalidades
 
 - Registro de usuarios.
-- Inicio de sesión.
-- Cierre de sesión.
+- Inicio y cierre de sesión.
 - Registro de contactos.
-- Búsqueda por nombre, teléfono y cédula.
-- Edición de contactos.
-- Eliminación de contactos.
-- Validación de formularios.
-- Administración individual de contactos por usuario.
+- Edición y eliminación de contactos.
+- Búsqueda por nombre, cédula, teléfono, correo y ciudad.
+- Clasificación de contactos favoritos.
+- Filtro de contactos favoritos.
+- Ordenamiento de contactos.
+- Fecha de creación de cada contacto.
+- Interfaz mejorada mediante CSS.
 
-## 6. Estructura del proyecto
+## 3. Tecnologías utilizadas
 
-agenda_contactos/
-- conexion.php
-- registro.php
-- login.php
-- index.php
-- editar.php
-- eliminar.php
-- logout.php
-- estilos.css
-- agenda_contactos.sql
-- README.md
+- HTML5.
+- CSS3.
+- PHP.
+- MySQL.
+- PDO.
+- XAMPP.
+- Git y GitHub.
+- InfinityFree.
 
-## 7. Seguridad
+## 4. Despliegue de la aplicación
 
-El sistema utiliza sesiones PHP para controlar el acceso,
-consultas preparadas mediante PDO y contraseñas almacenadas
-mediante funciones de hash.
+La aplicación se encuentra alojada en InfinityFree, utilizando PHP y una base de datos MySQL.
 
-## 8. Tipo de proyecto
+### Acceso a la aplicación
 
-Proyecto académico de desarrollo web con PHP y MySQL.
+https://agenda-contactos-sv.infinityfree.io/agenda_contactos/login.php
+
+### Repositorio GitHub
+
+https://github.com/vill2undjb4j/agenda-contactos
+
+## 5. Instalación local
+
+1. Descargar el repositorio.
+2. Copiar el proyecto a la carpeta htdocs de XAMPP.
+3. Iniciar Apache y MySQL.
+4. Crear e importar la base de datos con la estructura actualizada.
+5. Configurar las credenciales de conexión local.
+6. Acceder a la aplicación desde localhost.
+
+## 6. Seguridad
+
+El sistema utiliza sesiones, consultas preparadas mediante PDO y almacenamiento de contraseñas mediante hash.
+
+Las credenciales privadas del hosting no deben publicarse en GitHub.
+
+## 7. Conclusión
+
+La segunda versión de la agenda incorpora mejoras funcionales que facilitan la administración, búsqueda y clasificación de contactos. El despliegue en Internet permite acceder a la aplicación desde diferentes dispositivos.
+
+## 8. Autor
+
+Steeven Jahir Villegas Romero
+
+Universidad Técnica Particular de Loja (UTPL)
+
+Carrera de Tecnologías de la Información.
